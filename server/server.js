@@ -104,16 +104,29 @@ app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 
 // Serve static assets
-const distPath = path.join(__dirname, "../client/dist");
+const distPath = path.join(process.cwd(), "client/dist");
+console.log("Checking for static files at:", distPath);
+
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-  console.log("Serving static files from:", distPath);
+  console.log("Successfully set up static file serving from:", distPath);
 
   app.get("*", (req, res) => {
+    // Return index.html for any request that isn't an API call and isn't a static file found above
     if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(distPath, "index.html"));
+      const indexPath = path.join(distPath, "index.html");
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        console.error("Index file not found at:", indexPath);
+        res.status(404).send("Frontend build not found");
+      }
     }
   });
+} else {
+  console.warn("Static files directory NOT FOUND at:", distPath);
+  console.log("Current working directory:", process.cwd());
+  console.log("Directory contents of root:", fs.readdirSync(process.cwd()));
 }
 
 // Connect to DB and Start Server
