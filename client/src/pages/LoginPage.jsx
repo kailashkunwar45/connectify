@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { login } from "../lib/api.js"; // make sure login sends withCredentials
-import { NetworkIcon } from "lucide-react";
+import { login } from "../lib/api.js";
+import { BrainCircuitIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useThemeStore } from "../store/useThemeStore.js";
@@ -12,13 +12,10 @@ const LoginPage = ({ onLoginSuccess }) => {
   const { theme } = useThemeStore();
 
   const { mutate: loginMutation, isLoading, error } = useMutation({
-    mutationFn: (data) => login(data), // login now sends withCredentials
+    mutationFn: (data) => login(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
-
-      // send user data to App.jsx
       onLoginSuccess(data.user);
-
       toast.success("Login successful!");
     },
     onError: (err) => {
@@ -39,12 +36,12 @@ const LoginPage = ({ onLoginSuccess }) => {
       <div className="border border-primary/25 flex flex-col lg:flex-row w-full max-w-3xl bg-base-100 rounded-xl shadow-lg overflow-hidden">
 
         {/* LEFT SIDE */}
-        <div className="w-full lg:w-1/2 p-6 sm:p-8 flex flex-col">
+        <div className="w-full lg:w-1/2 p-5 sm:p-8 flex flex-col">
 
           {/* Logo */}
           <div className="mb-6 flex items-center gap-2">
-            <NetworkIcon className="w-9 h-9 text-primary" />
-            <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
+            <BrainCircuitIcon className="w-8 h-8 sm:w-9 sm:h-9 text-primary" />
+            <span className="text-2xl sm:text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
               LinkIt
             </span>
           </div>
@@ -58,10 +55,10 @@ const LoginPage = ({ onLoginSuccess }) => {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-5 sm:space-y-6">
             <div>
               <h2 className="text-xl font-semibold">Welcome Back</h2>
-              <p className="text-sm opacity-70">Sign in to your account</p>
+              <p className="text-sm opacity-70">Sign in to your LinkIt account</p>
             </div>
 
             {/* EMAIL */}

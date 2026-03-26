@@ -116,14 +116,25 @@
     @apply p-4 !important;
 }
 
-[data-theme] .flex-col.items-end {
-    @apply items-end w-full !important;
+/* Fix CSS alignment issues */
+.str-chat__message-li {
+    @apply w-full flex !important;
 }
 
-[data-theme] .flex-col.items-start {
-    @apply items-start w-full !important;
+.str-chat__message-simple {
+    @apply w-full !important;
 }
 
 .str-chat__message-simple-text-inner {
-    @apply max-w-sm md:max-w-md !important;
+    @apply max-w-[85%] sm:max-w-[75%] !important;
+}
+
+/* Fix mobile viewport height (dvh) */
+@supports (height: 100dvh) {
+  .h-screen {
+    height: 100dvh;
+  }
+  .min-h-screen {
+    min-height: 100dvh;
+  }
 }

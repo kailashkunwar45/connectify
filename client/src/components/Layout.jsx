@@ -25,8 +25,8 @@ const Layout = ({ children, showSidebar = false }) => {
   const incomingCount = friendReqData?.incomingRequests?.length || 0;
 
   const MobileNav = () => (
-    <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-sm">
-      <div className="glass rounded-3xl p-3 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10 flex items-center justify-between px-6">
+    <div className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] w-[92%] max-w-sm">
+      <div className="glass rounded-2xl p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10 flex items-center justify-between px-4">
         <MobileNavItem to="/" icon={HomeIcon} active={location.pathname === "/"} />
         <MobileNavItem to="/search" icon={SearchIcon} active={location.pathname === "/search"} />
         <MobileNavItem to="/friends" icon={UsersIcon} active={location.pathname === "/friends"} />
@@ -39,15 +39,15 @@ const Layout = ({ children, showSidebar = false }) => {
   const MobileNavItem = ({ to, icon: Icon, active, badge }) => (
     <Link 
       to={to} 
-      className={`relative p-3 rounded-2xl transition-all duration-300 ${
+      className={`relative p-2.5 rounded-xl transition-all duration-300 ${
         active 
-        ? "bg-primary text-white shadow-lg shadow-primary/40 scale-110 -translate-y-2" 
+        ? "bg-primary text-white shadow-lg shadow-primary/40 scale-110 -translate-y-1.5" 
         : "opacity-60 hover:opacity-100 hover:text-success hover:bg-success/10 hover:shadow-md hover:shadow-success/20 hover:scale-105"
       }`}
     >
-      <Icon size={20} />
+      <Icon size={18} />
       {badge > 0 && !active && (
-        <span className="absolute -top-1 -right-1 bg-error text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full animate-pulse">
+        <span className="absolute -top-1 -right-1 bg-error text-white text-[7px] font-black w-3.5 h-3.5 flex items-center justify-center rounded-full animate-pulse">
           {badge > 9 ? "9+" : badge}
         </span>
       )}
@@ -63,7 +63,7 @@ const Layout = ({ children, showSidebar = false }) => {
       <div className="flex relative z-10 h-full min-h-screen">
         {showSidebar && <Sidebar />}
 
-        <div className="flex-1 flex flex-col min-h-screen">
+        <div className="flex-1 flex flex-col min-h-screen w-full overflow-x-hidden">
           <Navbar />
           <motion.main 
             key={location.pathname}
@@ -71,7 +71,7 @@ const Layout = ({ children, showSidebar = false }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-            className="flex-1 overflow-y-auto pb-24 md:pb-0"
+            className="flex-1 overflow-y-auto pb-20 md:pb-0"
           >
             {children}
           </motion.main>

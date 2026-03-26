@@ -131,7 +131,7 @@ const HomePage = () => {
           </div>
         ) : recomendedUsers.length === 0 ? (
           <div className="glass p-12 text-center rounded-3xl border-base-300 opacity-50">
-            <h3 className="font-semibold text-lg">Everyone is connected! Check back later.</h3>
+            <h3 className="font-semibold text-lg">Everyone is linked up! Check back later.</h3>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

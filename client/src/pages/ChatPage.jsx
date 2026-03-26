@@ -65,7 +65,8 @@ const CustomMessage = () => {
     // It's 'sent' (one tick) once it reaches the Stream server ('received' status) or locally sent
     const isSent = message.status === 'sending' || message.status === 'sent' || message.status === 'received';
 
-    if (isRead) return <div className="message-status-ticks text-green-500 opacity-100 font-bold ml-1 flex items-center"><CheckCheckIcon size={16} color="currentColor" /></div>;
+    // Green ticks for seen
+    if (isRead) return <div className="message-status-ticks text-success opacity-100 font-bold ml-1 flex items-center"><CheckCheckIcon size={16} color="currentColor" /></div>;
     if (isDelivered) return <div className="message-status-ticks opacity-60 ml-1 flex items-center"><CheckCheckIcon size={16} /></div>;
     if (isSent) return <div className="message-status-ticks opacity-60 ml-1 flex items-center"><CheckIcon size={16} /></div>;
     
@@ -73,14 +74,14 @@ const CustomMessage = () => {
   };
 
   return (
-    <div className={`flex flex-col mb-3 sm:mb-4 px-2 sm:px-0 ${isMyMessage ? 'items-end' : 'items-start'}`}>
+    <div className={`flex flex-col mb-3 sm:mb-4 px-2 sm:px-0 ${isMyMessage ? 'items-start' : 'items-end'}`}>
         <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-3 sm:px-4 py-2 shadow-sm ${
             isMyMessage 
-                ? 'bg-primary text-primary-content rounded-tr-none' 
-                : 'bg-base-200 text-base-content rounded-tl-none'
+                ? 'bg-primary text-primary-content rounded-tl-none' 
+                : 'bg-base-200 text-base-content rounded-tr-none'
         }`}>
             <p className="text-sm break-words">{message.text}</p>
-            <div className={`flex items-center justify-end mt-1 gap-1`}>
+            <div className={`flex items-center ${isMyMessage ? 'justify-end' : 'justify-start'} mt-1 gap-1`}>
                 <span className="text-[9px] opacity-50">
                     {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
@@ -182,7 +183,7 @@ export default function ChatPage({ authUser }) {
   const filters = { type: 'messaging', members: { $in: [userId] } };
 
   return (
-    <div className="h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)] bg-base-200/50 md:p-4 lg:p-6" data-theme={theme}>
+    <div className="h-[calc(100dvh-56px)] sm:h-[calc(100dvh-64px)] bg-base-200/50 md:p-4 lg:p-6" data-theme={theme}>
       <div className="max-w-7xl mx-auto h-full glass md:rounded-3xl overflow-hidden shadow-2xl flex border border-base-300">
         <Chat client={chatClient} theme={`str-chat__theme-${theme === 'dark' ? 'dark' : 'light'}`}>
           {/* Sidebar - HIDDEN on mobile if channel is selected */}

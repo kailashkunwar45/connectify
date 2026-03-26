@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NetworkIcon } from "lucide-react";
+import { BrainCircuitIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
@@ -23,7 +23,7 @@ const SignUpPage = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
-      navigate("/login"); // redirect after signup
+      navigate("/login");
     },
   });
 
@@ -47,12 +47,12 @@ const SignUpPage = () => {
       <div className="border border-primary/25 flex flex-col lg:flex-row w-full max-w-3xl bg-base-100 rounded-xl shadow-lg overflow-hidden">
 
         {/* LEFT SIDE */}
-        <div className="w-full lg:w-1/2 p-6 sm:p-8 flex flex-col">
+        <div className="w-full lg:w-1/2 p-5 sm:p-8 flex flex-col">
 
           {/* Logo */}
           <div className="mb-6 flex items-center gap-2">
-            <NetworkIcon className="w-9 h-9 text-primary" />
-            <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
+            <BrainCircuitIcon className="w-8 h-8 sm:w-9 sm:h-9 text-primary" />
+            <span className="text-2xl sm:text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
               LinkIt
             </span>
           </div> 
@@ -66,7 +66,7 @@ const SignUpPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSignup} className="space-y-6">
+          <form onSubmit={handleSignup} className="space-y-5 sm:space-y-6">
 
             <div>
               <h2 className="text-xl font-semibold">Create an Account</h2>
@@ -121,7 +121,7 @@ const SignUpPage = () => {
                 onChange={handleChange}
                 required
               />
-              <p className="text-xs opacity-70">
+              <p className="text-xs opacity-70 mt-1">
                 Password must be at least 8 characters
               </p>
             </div>
