@@ -15,7 +15,7 @@ import {
 } from 'stream-chat-react';
 import 'stream-chat-react/dist/css/v2/index.css';
 import { useThemeStore } from '../store/useThemeStore';
-import { VideoIcon, MessageCircleIcon, PhoneIcon, SearchIcon, MoreVerticalIcon, CheckIcon, CheckCheckIcon } from 'lucide-react';
+import { VideoIcon, MessageCircleIcon, PhoneIcon, SearchIcon, MoreVerticalIcon, CheckIcon, CheckCheckIcon, ArrowLeftIcon, NetworkIcon } from 'lucide-react';
 import { useNavigate, Link, useParams } from 'react-router-dom';
 import CustomChannelPreview from '../components/CustomChannelPreview';
 
@@ -26,7 +26,7 @@ const CustomEmptyState = () => (
       </div>
       <div className="space-y-2">
          <h3 className="text-2xl font-black tracking-tight">Your Inbox is Empty</h3>
-         <p className="opacity-60 text-sm max-w-[250px] mx-auto font-medium">Connect with global learners to start your journey.</p>
+         <p className="opacity-60 text-sm max-w-[250px] mx-auto font-medium">Link with global learners to start your journey.</p>
       </div>
       <Link to="/search" className="btn btn-primary rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 transition-transform px-8">
          Discover Partners
@@ -94,7 +94,7 @@ const CustomMessage = () => {
 const CustomChannelHeader = (props) => {
   const navigate = useNavigate();
   const { channel } = useChannelStateContext();
-  const { authUser } = props;
+  const { authUser, onBack } = props;
   
   const otherMember = Object.values(channel.state.members).find(m => m.user.id !== (authUser?._id?.toString() || authUser?.id?.toString()));
   const displayUser = otherMember?.user || {};
@@ -115,8 +115,13 @@ const CustomChannelHeader = (props) => {
   };
 
   return (
-    <div className="flex items-center justify-between w-full px-4 py-3 border-b border-base-300 bg-base-100/50 backdrop-blur-sm sticky top-0 z-10 transition-all">
+    <div className="flex items-center justify-between w-full px-4 py-3 border-b border-base-300 bg-base-100/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="flex items-center gap-3">
+        {onBack && (
+          <button onClick={onBack} className="btn btn-ghost btn-circle btn-sm lg:hidden mr-1">
+             <ArrowLeftIcon size={20} />
+          </button>
+        )}
         <div className="relative">
           <Avatar image={displayUser.image} name={displayUser.name || displayUser.id} size={40} />
           {displayUser.online && (
@@ -124,33 +129,16 @@ const CustomChannelHeader = (props) => {
           )}
         </div>
         <div>
-          <h3 className="font-bold text-sm">{displayUser.name || displayUser.id}</h3>
+          <h3 className="font-bold text-sm leading-tight">{displayUser.name || displayUser.id}</h3>
           <p className="text-[10px] opacity-50 font-medium">
             {displayUser.online ? 'Online' : 'Offline'}
           </p>
         </div>
       </div>
-      {otherMember && (
-         <div className="flex items-center gap-2">
-            <button 
-              onClick={() => handleCall('audio')} 
-              className="btn btn-ghost btn-circle btn-sm hover:bg-primary/10 text-primary transition-all duration-300"
-              title="Voice Call"
-            >
-               <PhoneIcon size={18} />
-            </button>
-            <button 
-              onClick={() => handleCall('video')} 
-              className="btn btn-ghost btn-circle btn-sm hover:bg-secondary/10 text-secondary transition-all duration-300"
-              title="Video Call"
-            >
-               <VideoIcon size={18} />
-            </button>
-            <button className="btn btn-ghost btn-circle btn-sm opacity-40 hover:opacity-100 transition-opacity">
-               <MoreVerticalIcon size={18} />
-            </button>
-         </div>
-      )}
+      <div className="flex items-center gap-1">
+         <button onClick={() => handleCall('audio')} className="btn btn-ghost btn-circle btn-sm text-primary"><PhoneIcon size={18} /></button>
+         <button onClick={() => handleCall('video')} className="btn btn-ghost btn-circle btn-sm text-secondary"><VideoIcon size={18} /></button>
+      </div>
     </div>
   );
 };
@@ -160,6 +148,7 @@ export default function ChatPage({ authUser }) {
   const [chatClient, setChatClient] = useState(null);
   const { theme } = useThemeStore();
   const { id: channelOrUserId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -169,97 +158,71 @@ export default function ChatPage({ authUser }) {
         const userId = authUser._id?.toString() || authUser.id?.toString();
         if(!userId || !authUser.streamToken || !authUser.streamApiKey) return;
 
-        console.log("Connecting user to Stream:", userId);
         client = StreamChat.getInstance(authUser.streamApiKey);
-        
-        // Connect user if not already connected
-        if (client.userID !== userId || client.tokenManager.token !== authUser.streamToken) {
-            if (client.userID) await client.disconnectUser();
-            await client.connectUser({
-              id: userId,
+        if (client.userID !== userId) {
+            await client.connectUser({ 
+              id: userId, 
               name: authUser.name || 'User',
-              image: authUser.profilePic || "https://api.dicebear.com/9.x/avataaars/svg?seed=default",
+              image: authUser.profilePic
             }, authUser.streamToken);
         }
 
-        // Handle direct navigation to a user/channel
-        if (channelOrUserId && isMounted) {
-            try {
-              const channel = client.channel('messaging', {
-                  members: [userId, channelOrUserId],
-              });
-              await channel.watch();
-            } catch (err) {
-              console.error("Error watching channel:", err);
-            }
-        }
-        
-        if (isMounted) {
-            setChatClient(client);
-        }
+        if (isMounted) setChatClient(client);
       } catch (error) {
         console.error("Error connecting to Stream:", error);
       }
     };
-
     initChat();
+    return () => { isMounted = false; };
+  }, [authUser]);
 
-    return () => {
-      isMounted = false;
-      setChatClient(null);
-    };
-  }, [authUser, channelOrUserId]);
-
-  if (!chatClient) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] flex-col gap-4">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
-        <p className="opacity-60">Connecting to chat...</p>
-      </div>
-    );
-  }
+  if (!chatClient) return <div className="flex items-center justify-center min-h-[60vh]"><span className="loading loading-spinner text-primary"></span></div>;
 
   const userId = authUser._id?.toString() || authUser.id?.toString();
   const filters = { type: 'messaging', members: { $in: [userId] } };
-  const sort = { last_message_at: -1 };
-  const options = { limit: 10 };
 
   return (
-    <div className="h-[calc(100vh-64px)] bg-base-200/50 p-4 lg:p-6" data-theme={theme}>
-      <div className="max-w-7xl mx-auto h-full glass rounded-3xl overflow-hidden shadow-2xl flex border border-base-300">
+    <div className="h-[calc(100vh-80px)] md:h-[calc(100vh-64px)] bg-base-200/50 md:p-4 lg:p-6" data-theme={theme}>
+      <div className="max-w-7xl mx-auto h-full glass md:rounded-3xl overflow-hidden shadow-2xl flex border border-base-300">
         <Chat client={chatClient} theme={`str-chat__theme-${theme === 'dark' ? 'dark' : 'light'}`}>
-          <div className="w-1/3 lg:w-1/4 border-r border-base-300 h-full bg-base-100/50 backdrop-blur-md flex flex-col">
+          {/* Sidebar - HIDDEN on mobile if channel is selected */}
+          <div className={`${channelOrUserId ? 'hidden lg:flex' : 'flex'} w-full lg:w-1/4 border-r border-base-300 h-full bg-base-100/50 backdrop-blur-md flex-col`}>
             <div className="p-4 border-b border-base-300">
-               <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-base-content/40">
-                     <SearchIcon size={16} />
-                  </span>
-                  <input 
-                    type="text" 
-                    placeholder="Search friends..." 
-                    className="input input-sm w-full pl-10 bg-base-200/50 border-none rounded-xl focus:ring-1 focus:ring-primary/30"
-                  />
-               </div>
+               <input type="text" placeholder="Search friends..." className="input input-sm w-full bg-base-200/50 rounded-xl" />
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar pt-2">
               <ChannelList 
-                 filters={filters} 
-                 sort={sort} 
-                 options={options}
-                 EmptyStateIndicator={CustomEmptyState}
-                 Preview={(props) => <CustomChannelPreview {...props} authUser={authUser} />}
+                  filters={filters} 
+                  sort={{ last_message_at: -1 }} 
+                  Preview={(props) => <CustomChannelPreview {...props} authUser={authUser} />}
+                  onSelect={(channel) => {
+                      const other = Object.keys(channel.state.members).find(id => id !== userId);
+                      navigate(`/chat/${other}`);
+                  }}
               />
             </div>
           </div>
-          <div className="flex-1 h-full bg-base-100/30 backdrop-blur-sm">
-            <Channel Message={CustomMessage}>
-              <Window>
-                <CustomChannelHeader authUser={authUser} />
-                <MessageList />
-                <MessageInput grow />
-              </Window>
-              <Thread />
-            </Channel>
+
+          {/* Chat Window - FULL WIDTH on mobile if channel is selected */}
+          <div className={`${channelOrUserId ? 'flex' : 'hidden lg:flex'} flex-1 h-full bg-base-100/30 backdrop-blur-sm`}>
+            {channelOrUserId ? (
+               <Channel Message={CustomMessage}>
+                <Window>
+                  <CustomChannelHeader authUser={authUser} onBack={() => navigate('/chat')} />
+                  <MessageList />
+                  <MessageInput grow />
+                </Window>
+                <Thread />
+               </Channel>
+            ) : (
+               <div className="hidden lg:flex flex-col items-center justify-center w-full h-full opacity-30 text-center p-8">
+                  <div className="p-6 bg-primary/10 rounded-full mb-4">
+                    <NetworkIcon size={64} className="text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-black">Your Neural Links</h3>
+                  <p className="font-medium mt-2 max-w-xs">Select a friend to start chatting and stay linked.</p>
+               </div>
+            )}
           </div>
         </Chat>
       </div>

@@ -1,7 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
 import {
-  GlobeIcon,
+  NetworkIcon,
   HomeIcon,
   UsersIcon,
   BellIcon,
@@ -36,10 +36,10 @@ const Sidebar = () => {
       {/* Logo */}
       <Link to="/" className="flex items-center gap-3 p-8">
         <div className="p-2.5 bg-gradient-to-tr from-primary to-secondary rounded-2xl shadow-lg shadow-primary/20">
-            <GlobeIcon className="w-8 h-8 text-white" />
+            <NetworkIcon className="w-8 h-8 text-white" />
         </div>
         <div className="flex flex-col leading-tight">
-          <span className="text-2xl font-black tracking-tighter">Connect</span>
+          <span className="text-2xl font-black tracking-tighter">LinkIt</span>
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Fluent P2P</span>
         </div>
       </Link>

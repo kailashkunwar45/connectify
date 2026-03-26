@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { logout, getFriendRequests } from "../lib/api";
-import { GlobeIcon, BellIcon, LogOutIcon, SearchIcon, SettingsIcon } from "lucide-react";
+import { NetworkIcon, BellIcon, LogOutIcon, SearchIcon, SettingsIcon } from "lucide-react";
 import useAuthUser from "../hooks/useAuthUser";
 import ThemeSelector from "./ThemeSelector.jsx";
 
@@ -42,9 +42,9 @@ const Navbar = () => {
           {/* Show logo only on chat page */}
           {isChatPage && (
             <Link to="/" className="flex items-center gap-2.5">
-              <GlobeIcon className="w-9 h-9 text-primary" />
+              <NetworkIcon className="w-9 h-9 text-primary" />
               <span className="text-2xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-                Connectify
+                LinkIt
               </span>
             </Link>
           )}

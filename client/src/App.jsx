@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Layout from "./components/Layout.jsx";
 import PageLoader from "./components/PageLoader.jsx";
+import CallNotification from "./components/CallNotification.jsx";
 import { useThemeStore } from "./store/useThemeStore.js";
 import useAuthUser from "./hooks/useAuthUser.js";
 
@@ -202,6 +203,7 @@ const App = () => {
         </Routes>
       </Suspense>
 
+      <CallNotification />
       <Toaster position="top-right" reverseOrder={false} />
     </div>
   );

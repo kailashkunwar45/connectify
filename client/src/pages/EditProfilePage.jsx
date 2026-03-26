@@ -156,7 +156,7 @@ export default function EditProfilePage({ authUser }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div className="space-y-2">
                 <label className="text-sm font-bold uppercase tracking-widest opacity-40 ml-4 flex items-center gap-2">
-                    <GlobeIcon size={14} /> Native Language
+                    <LanguagesIcon size={14} /> Native Language
                 </label>
                 <select
                     className="select select-bordered w-full rounded-2xl bg-base-200/50 border-none focus:ring-4 focus:ring-primary/20 transition-all px-6 font-bold"

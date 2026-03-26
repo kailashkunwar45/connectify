@@ -111,3 +111,19 @@
 .message-status-ticks.read {
     @apply text-blue-400 opacity-100;
 }
+/* Message Alignment and Width Fixes */
+.str-chat__message-list {
+    @apply p-4 !important;
+}
+
+[data-theme] .flex-col.items-end {
+    @apply items-end w-full !important;
+}
+
+[data-theme] .flex-col.items-start {
+    @apply items-start w-full !important;
+}
+
+.str-chat__message-simple-text-inner {
+    @apply max-w-sm md:max-w-md !important;
+}

@@ -144,7 +144,7 @@ const OnboardingPage = () => {
 
             <div className="space-y-2">
                 <label className="text-sm font-bold uppercase tracking-widest opacity-40 ml-4 flex items-center gap-2">
-                    <GlobeIcon size={14} /> Native
+                    <LanguagesIcon size={14} /> Native
                 </label>
                 <select
                     className="select select-bordered w-full rounded-2xl bg-base-200/50 border-none focus:ring-4 focus:ring-primary/20 transition-all px-6 font-bold"

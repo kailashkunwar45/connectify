@@ -69,7 +69,7 @@ const HomePage = () => {
             Welcome back, <span className="text-primary">Learner</span>.
           </h1>
           <p className="text-lg opacity-70 leading-relaxed max-w-lg">
-            Connect with peers, practice languages, and grow your global network in 
+            Link with peers, practice languages, and grow your neural network in 
             real-time. Your journey to fluency continues here.
           </p>
           <div className="flex gap-4 pt-4">
@@ -186,7 +186,7 @@ const HomePage = () => {
                       : "btn-primary shadow-lg shadow-primary/20"
                     }`}
                   >
-                    {hasRequestBeenSent ? "Request Sent" : "Connect Now"}
+                    {hasRequestBeenSent ? "Request Sent" : "Link Up"}
                   </button>
                 </motion.div>
               );

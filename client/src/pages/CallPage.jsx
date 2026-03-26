@@ -2,12 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { VideoIcon, PhoneIcon, MicIcon, PhoneOffIcon, UserIcon, Loader2Icon } from "lucide-react";
 import { useThemeStore } from "../store/useThemeStore";
 import useAuthUser from "../hooks/useAuthUser";
-import { io } from "socket.io-client";
+import { useSocket } from "../hooks/useSocket";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "react-router-dom";
-
-const SOCKET_URL = import.meta.env.MODE === "production" ? "" : (import.meta.env.VITE_SOCKET_URL || "http://localhost:5001");
 
 const configuration = {
   iceServers: [
@@ -19,7 +17,7 @@ const configuration = {
 export default function CallPage() {
   const { theme } = useThemeStore();
   const { authUser } = useAuthUser();
-  const [socket, setSocket] = useState(null);
+  const { socket } = useSocket(authUser?._id);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [isCalling, setIsCalling] = useState(false);
@@ -40,126 +38,17 @@ export default function CallPage() {
     ringToneRef.current.loop = true;
   }, []);
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const userId = params.get('userId');
-    if (userId) setTargetUserId(userId);
-  }, [location]);
-
-  useEffect(() => {
-    if (!authUser) return;
-
-    const s = io(SOCKET_URL);
-    setSocket(s);
-
-    s.on("connect", () => {
-      s.emit("register", authUser._id);
-    });
-
-    s.on("incoming-call", ({ from, offer, name, profilePic }) => {
-      setIncomingCall({ from, offer, name, profilePic });
-      ringToneRef.current.play().catch(e => console.log("Audio play failed:", e));
-    });
-
-    s.on("call-answered", async ({ answer }) => {
-      if (peerConnection.current) {
-        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
-        setCallStatus("active");
-      }
-    });
-
-    s.on("ice-candidate", async ({ candidate }) => {
-      if (peerConnection.current && candidate) {
-        await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
-      }
-    });
-
-    s.on("call-ended", () => {
-      endCall(false);
-    });
-
-    // Get user media on mount
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then(stream => {
-        setLocalStream(stream);
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-      })
-      .catch(err => {
-        toast.error("Could not access camera/microphone", { id: "camera-error" });
-        console.error(err);
-      });
-
-    return () => {
-      s.disconnect();
-      if (localStream) localStream.getTracks().forEach(track => track.stop());
-    };
-  }, [authUser]);
-
-  const initPeerConnection = () => {
-    const pc = new RTCPeerConnection(configuration);
-    
-    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit("ice-candidate", { to: targetUserId || incomingCall?.from, candidate: event.candidate });
-      }
-    };
-
-    pc.ontrack = (event) => {
-      setRemoteStream(event.streams[0]);
-      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = event.streams[0];
-    };
-
-    peerConnection.current = pc;
-    return pc;
-  };
-
-  const startCall = async () => {
-    if (!targetUserId) return toast.error("Please enter a User ID to call");
-    
-    setIsCalling(true);
-    setCallStatus("calling");
-    dialToneRef.current.play().catch(e => console.log("Dial tone failed:", e));
-    
-    const pc = initPeerConnection();
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-
-    socket.emit("call-user", {
-      to: targetUserId,
-      from: authUser._id,
-      offer,
-      name: authUser.name,
-      profilePic: authUser.profilePic
-    });
-  };
-
-  const acceptCall = async () => {
-    ringToneRef.current.pause();
-    ringToneRef.current.currentTime = 0;
-    
-    const pc = initPeerConnection();
-    await pc.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
-    
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-
-    socket.emit("answer-call", { to: incomingCall.from, answer });
-    setCallStatus("active");
-    setIncomingCall(null);
-  };
-
   const endCall = (emit = true) => {
     if (emit && (targetUserId || incomingCall?.from)) {
       socket.emit("end-call", { to: targetUserId || incomingCall?.from });
     }
     
-    if (peerConnection.current) {
-      peerConnection.current.close();
-      peerConnection.current = null;
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
     }
-    
+    setLocalStream(null);
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+
     setRemoteStream(null);
     setCallStatus("idle");
     setIncomingCall(null);
@@ -173,6 +62,131 @@ export default function CallPage() {
     toast("Call ended");
   };
 
+  const initPeerConnection = (otherUserId) => {
+    const pc = new RTCPeerConnection(configuration);
+    
+    if (localStream) {
+        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+    }
+
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit("ice-candidate", { to: otherUserId, candidate: event.candidate });
+      }
+    };
+
+    pc.ontrack = (event) => {
+      setRemoteStream(event.streams[0]);
+      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = event.streams[0];
+    };
+
+    peerConnection.current = pc;
+    return pc;
+  };
+
+  const adoptAnswer = async (answer) => {
+    if (peerConnection.current) {
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+        setCallStatus("active");
+        dialToneRef.current.pause();
+    }
+  };
+
+  const addIce = async (candidate) => {
+    if (peerConnection.current && candidate) {
+        await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+    }
+  };
+
+  const acceptIncomingCall = async (callData) => {
+    ringToneRef.current.pause();
+    ringToneRef.current.currentTime = 0;
+    
+    // Request media ONLY when accepting call
+    const stream = await requestMedia();
+    if (!stream) return;
+
+    const pc = initPeerConnection(callData.from);
+    await pc.setRemoteDescription(new RTCSessionDescription(callData.offer));
+    
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    socket.emit("answer-call", { to: callData.from, answer });
+    setCallStatus("active");
+  };
+
+  useEffect(() => {
+    if (!socket || !authUser) return;
+
+    const handleIncomingCall = ({ from, offer, name, profilePic }) => {
+      const callData = { from, offer, name, profilePic };
+      setIncomingCall(callData);
+      ringToneRef.current.play().catch(e => console.log("Audio play failed:", e));
+      
+      const params = new URLSearchParams(location.search);
+      if (params.get('accept') === 'true' && params.get('userId') === from) {
+         // Auto-accept after a short delay to ensure local stream is ready
+         setTimeout(() => acceptIncomingCall(callData), 1000);
+      }
+    };
+
+    socket.on("incoming-call", handleIncomingCall);
+    socket.on("call-answered", ({ answer }) => adoptAnswer(answer));
+    socket.on("ice-candidate", ({ candidate }) => addIce(candidate));
+    socket.on("call-ended", () => endCall(false));
+
+    // Handle initial target from URL
+    const params = new URLSearchParams(location.search);
+    const userIdFromUrl = params.get('userId');
+    if (userIdFromUrl) setTargetUserId(userIdFromUrl);
+
+    return () => {
+      socket.off("incoming-call", handleIncomingCall);
+      socket.off("call-answered");
+      socket.off("ice-candidate");
+      socket.off("call-ended");
+      if (localStream) localStream.getTracks().forEach(track => track.stop());
+    };
+  }, [socket, authUser, location.search]);
+
+  const requestMedia = async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        setLocalStream(stream);
+        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+        return stream;
+    } catch (err) {
+        toast.error("Could not access camera/microphone");
+        console.error(err);
+        return null;
+    }
+  };
+
+  const startCall = async () => {
+    if (!targetUserId) return toast.error("Please enter a User ID to call");
+    
+    // Request media ONLY when starting call
+    const stream = await requestMedia();
+    if (!stream) return;
+
+    setIsCalling(true);
+    setCallStatus("calling");
+    dialToneRef.current.play().catch(e => console.log("Dial tone failed:", e));
+    
+    const pc = initPeerConnection(targetUserId);
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    socket.emit("call-user", {
+      to: targetUserId,
+      from: authUser._id,
+      offer,
+      name: authUser.name,
+      profilePic: authUser.profilePic
+    });
+  };
+
   return (
     <div className="h-full flex flex-col p-4 lg:p-8 bg-base-100/50" data-theme={theme}>
       <div className="max-w-6xl mx-auto w-full h-full flex flex-col gap-6">
@@ -180,8 +194,8 @@ export default function CallPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-gradient">Video Connect</h1>
-            <p className="opacity-60 text-sm">Signaled peer-to-peer communication</p>
+            <h1 className="text-3xl font-extrabold text-gradient">LinkIt Video</h1>
+            <p className="opacity-60 text-sm">Neural network signaling for learners</p>
           </div>
           <div className="flex items-center gap-2 text-xs opacity-50 bg-base-200 p-2 rounded-xl">
             My ID: <span className="font-mono text-primary font-bold">{authUser?._id}</span>
@@ -197,7 +211,7 @@ export default function CallPage() {
             />
             {callStatus === "idle" && (
                 <button onClick={startCall} className="btn btn-primary btn-sm rounded-xl px-6 shadow-lg shadow-primary/20">
-                    <PhoneIcon size={16} /> Call
+                    <PhoneIcon size={16} /> Link Up
                 </button>
             )}
           </div>
@@ -306,7 +320,7 @@ export default function CallPage() {
                              <button onClick={() => setIncomingCall(null)} className="btn btn-circle btn-error btn-lg shadow-2xl shadow-error/30 hover:scale-110 transition-transform">
                                 <PhoneOffIcon size={28} />
                              </button>
-                             <button onClick={acceptCall} className="btn btn-circle btn-success btn-lg shadow-2xl shadow-success/30 hover:scale-110 transition-transform">
+                             <button onClick={() => acceptIncomingCall(incomingCall)} className="btn btn-circle btn-success btn-lg shadow-2xl shadow-success/30 hover:scale-110 transition-transform">
                                 <PhoneIcon size={28} />
                              </button>
                         </div>

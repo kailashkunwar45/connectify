@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { login } from "../lib/api.js"; // make sure login sends withCredentials
-import { GlobeIcon } from "lucide-react";
+import { NetworkIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useThemeStore } from "../store/useThemeStore.js";
@@ -43,9 +43,9 @@ const LoginPage = ({ onLoginSuccess }) => {
 
           {/* Logo */}
           <div className="mb-6 flex items-center gap-2">
-            <GlobeIcon className="w-9 h-9 text-primary" />
+            <NetworkIcon className="w-9 h-9 text-primary" />
             <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-              Connectify
+              LinkIt
             </span>
           </div>
 
@@ -138,7 +138,7 @@ const LoginPage = ({ onLoginSuccess }) => {
 
             <div className="text-center space-y-3 mt-6">
               <h2 className="text-xl font-semibold">
-                Connect With Language Learners Around the World
+                Link With Language Learners Around the World
               </h2>
               <p className="opacity-70">
                 Practice conversation skills with native speakers and improve

@@ -116,7 +116,7 @@ export default function PublicProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-base-200/50 rounded-[2rem] p-6 lg:p-8 space-y-4 shadow-sm">
                     <div className="flex items-center gap-3 text-primary opacity-80 mb-2">
-                        <GlobeIcon size={24} />
+                        <LanguagesIcon size={24} />
                         <h3 className="font-bold tracking-widest uppercase text-sm">Native Language</h3>
                     </div>
                     <p className="text-2xl font-black">{user.nativeLanguage || "Not Specified"}</p>

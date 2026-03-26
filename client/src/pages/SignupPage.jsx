@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { GlobeIcon } from "lucide-react";
+import { NetworkIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios";
@@ -51,9 +51,9 @@ const SignUpPage = () => {
 
           {/* Logo */}
           <div className="mb-6 flex items-center gap-2">
-            <GlobeIcon className="w-9 h-9 text-primary" />
+            <NetworkIcon className="w-9 h-9 text-primary" />
             <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
-              Connectify
+              LinkIt
             </span>
           </div> 
 
@@ -71,7 +71,7 @@ const SignUpPage = () => {
             <div>
               <h2 className="text-xl font-semibold">Create an Account</h2>
               <p className="text-sm opacity-70">
-                Join Connectify and Start Your Language Learning Adventure!
+                Join LinkIt and Start Your Language Learning Adventure!
               </p>
             </div>
 
@@ -180,10 +180,10 @@ const SignUpPage = () => {
 
             <div className="text-center space-y-3 mt-6">
               <h2 className="text-xl font-semibold">
-                Connect With Language Learners Around the World
+                Link With Language Learners Around the World
               </h2>
               <p className="opacity-70">
-                Connectify connects you with language learners from around the world.
+                LinkIt links you with language learners from around the world.
               </p>
             </div>
 
