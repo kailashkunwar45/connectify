@@ -11,7 +11,6 @@ const OnboardingPage = () => {
     bio: "",
     location: "",
     nativeLanguage: "",
-    nativeLanguage: "",
     learningLanguage: "",
   });
   const [profileImgPreview, setProfileImgPreview] = useState(null);

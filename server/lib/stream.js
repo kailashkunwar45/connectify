@@ -1,3 +1,4 @@
+import "./env.js";
 import {StreamChat} from "stream-chat";
 
 const apiKey = process.env.STREAM_API_KEY;

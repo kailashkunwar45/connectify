@@ -1,8 +1,9 @@
+import "./lib/env.js";
 import express from 'express';
 import authRoutes from "./routes/authRoute.js";
 import userRoutes from "./routes/userRoute.js";
 import chatRoutes from "./routes/chatRoute.js";
-import dotenv from "dotenv";
+import chatRoutes from "./routes/chatRoute.js";
 import path from "path";
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -12,10 +13,7 @@ import cookieParser from 'cookie-parser';
 import http from "http";
 import { Server } from "socket.io";
 
-const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 const server = http.createServer(app);
