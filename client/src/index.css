@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  }
+
+  [data-theme='dark'] {
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+
+  body {
+    @apply transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply backdrop-blur-xl bg-opacity-70 border border-opacity-20 shadow-xl;
+    background-color: var(--glass-bg);
+    border-color: var(--glass-border);
+  }
+
+  .premium-card {
+    @apply glass rounded-3xl p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
+  }
+
+  .primary-gradient {
+    background: var(--primary-gradient);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent primary-gradient;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
+  }
+}
+
+/* Stream Chat Overrides */
+.str-chat {
+  --str-chat__primary-color: #6366f1;
+  --str-chat__active-primary-color: #a855f7;
+  --str-chat__surface-canvas: transparent;
+}
+
+[data-theme='dark'] .str-chat {
+  --str-chat__message-input-color: #f1f5f9;
+  --str-chat__text-color: #f1f5f9;
+  --str-chat__primary-text-color: #f1f5f9;
+  --str-chat__secondary-text-color: #94a3b8;
+}
+
+.str-chat-react__channel-list {
+  @apply bg-transparent border-none !important;
+}
+
+.str-chat__channel-preview-messenger {
+  @apply rounded-2xl mx-2 my-1 border-none transition-all !important;
+}
+
+.str-chat__channel-preview-messenger--active {
+  @apply bg-primary/10 shadow-sm !important;
+}
+
+.str-chat__message-simple {
+  @apply py-2 !important;
+}
+
+.str-chat__message-simple-text-inner {
+    @apply rounded-2xl px-4 py-3 shadow-sm !important;
+}
+
+[data-theme='dark'] .str-chat__message-simple-text-inner {
+    @apply bg-slate-800 text-slate-100 !important;
+}
+
+.str-chat__message-input {
+    @apply bg-transparent border-t border-base-300 p-4 !important;
+}
+
+[data-theme='dark'] .str-chat__message-input textarea {
+    @apply text-slate-100 placeholder-slate-400 !important;
+}
+
+/* Call History Message Styling */
+.call-event-message {
+    @apply flex items-center justify-center gap-2 py-2 px-4 bg-base-300/30 rounded-2xl text-[10px] font-bold opacity-60 italic mx-auto my-2 w-fit;
+}
+
+/* Message Ticks */
+.message-status-ticks {
+    @apply flex items-center ml-1 opacity-60;
+}
+.message-status-ticks.read {
+    @apply text-blue-400 opacity-100;
+}

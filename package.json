@@ -1,0 +1,17 @@
+{
+  "name": "connect",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
+    "start": "node --env-file=server/.env server/server.js",
+    "start:prod": "cross-env NODE_ENV=production node --env-file=server/.env server/server.js"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
